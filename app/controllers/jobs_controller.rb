@@ -54,6 +54,11 @@ class JobsController < ApplicationController
       params[:job][:input_data] = params[:job][:input_file].read
       params[:job].delete(:input_file)
     end
+    if(params[:job][:input_function_file])
+      logger.info "Reading :input_function_file into :input_function"
+      params[:job][:input_function] = params[:job][:input_function_file].read
+      params[:job].delete(:input_function_file)
+    end
     @job = Job.new(params[:job])
   end
 
@@ -83,6 +88,9 @@ class JobsController < ApplicationController
     # split is also checking the input format
     datafile = "public/perl/" + @job.file_prefix + ".input.txt"
     File.open(Rails.root.join(datafile), 'w') {|file| file.write(@job.input_data) }
+    
+    datafile = "public/perl/" + @job.file_prefix + ".input_function.txt"
+    File.open(Rails.root.join(datafile), 'w') {|file| file.write(@job.input_function) }
 
     datafiles = self.split_data_into_files(datafile)
     if (!datafiles)

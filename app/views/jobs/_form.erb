@@ -101,6 +101,21 @@
             <table cellSpacing="0" cellPadding="1" align="left" bgColor="#ababab" border="0">
                 <tr><td>
                     <table cellSpacing="0" cellPadding="1" width="100%" bgColor="#ffffcc" border="0">
+                        <tr vAlign=top><td nowrap
+                        bgColor="#ff8000"><strong><font color="#ffffff">Input Functions (Optional)</font></strong></td></tr>
+                        <tr><td BGCOLOR="#DCDCDC" HEIGHT="1"></td></tr>
+                        <tr valign="top"><td nowrap><font size="2">Upload function file: </font>
+                            <%= form.file_field :input_function_file %>&nbsp;
+                            <a href="tutorial-new.html#F" onmouseover="doTooltip(event,2)" onmouseout="hideTip()">
+                            <font size="1">what is this?</font></a>
+                        </td></tr>
+                        <tr><td BGCOLOR="#DCDCDC" HEIGHT="1"></td></tr>
+                        <tr><td><div align="center"><b>OR</b> <font size="2" color="#006C00">(Edit functions below)</font></div></td></tr>
+                        <tr><td BGCOLOR="#DCDCDC" HEIGHT="1"></td></tr>
+                        <tr valign="top"><td nowrap><div align="center">
+							<%= form.text_area :input_function, :cols => 50, :rows => 4 %>
+						</td></tr>
+       					<tr><td BGCOLOR="#DCDCDC" HEIGHT="1"></td></tr>
                         <tr vAlign=top><td nowrap bgColor="#ff8000"><strong><font color="#ffffff">Input Data</font></strong></td></tr>
                         <tr><td BGCOLOR="#DCDCDC" HEIGHT="1"></td></tr>
                         <tr valign="top"><td nowrap><font size="2">Upload data file: </font>

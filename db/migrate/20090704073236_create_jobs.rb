@@ -9,6 +9,7 @@ class CreateJobs < ActiveRecord::Migration
       t.boolean :show_discretized
       t.boolean :show_functions
       t.string  :input_data
+      t.string  :function_data
       t.boolean :show_probabilities_wiring_diagram
       t.boolean :show_probabilities_state_space
       t.boolean :is_deterministic
