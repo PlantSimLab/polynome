@@ -27,7 +27,8 @@ class JobsController < ApplicationController
 1.2  2.3  3.4
 1.1  1.2  1.3
 2.2  2.3  2.4
-0.1  0.2  0.3")
+0.1  0.2  0.3", :input_function =>
+  "f1 = x1")
     @job.save
     @error_message = params[:error_message]
   end
@@ -85,13 +86,14 @@ class JobsController < ApplicationController
         return
     end
 
-    # split is also checking the input format
-    datafile = "public/perl/" + @job.file_prefix + ".input.txt"
-    File.open(Rails.root.join(datafile), 'w') {|file| file.write(@job.input_data) }
-    
     datafile = "public/perl/" + @job.file_prefix + ".input_function.txt"
     File.open(Rails.root.join(datafile), 'w') {|file| file.write(@job.input_function) }
 
+    datafile = "public/perl/" + @job.file_prefix + ".input.txt"
+    File.open(Rails.root.join(datafile), 'w') {|file| file.write(@job.input_data) }
+    
+
+    # split is also checking the input format
     datafiles = self.split_data_into_files(datafile)
     if (!datafiles)
         # TODO make this error message nice
@@ -265,7 +267,6 @@ class JobsController < ApplicationController
         functionfile_name = self.functionfile_name(@job.file_prefix)
         logger.info "Functionfile : " + functionfile_name
 
-        logger.info `perl --version`
         logger.info "cd #{Rails.root}; perl #{Rails.root.join('public/perl/dvd_stochastic_runner.pl')} #{@job.nodes} #{@p_value.to_s} 1 #{stochastic_sequential_update} #{Rails.root.join('public/perl',@job.file_prefix)} #{@job.state_space_format} #{@job.wiring_diagram_format} #{wiring_diagram} #{state_space} #{sequential} #{@job.update_schedule} #{show_probabilities_state_space} 1 0 #{Rails.root.join(functionfile_name)}"
         
         simulation_output = `cd #{Rails.root}; perl #{Rails.root.join('public/perl/dvd_stochastic_runner.pl')} #{@job.nodes} #{@p_value.to_s} 1 #{stochastic_sequential_update} #{Rails.root.join('public/perl',@job.file_prefix)} #{@job.state_space_format} #{@job.wiring_diagram_format} #{wiring_diagram} #{state_space} #{sequential} #{@job.update_schedule} #{show_probabilities_state_space} 1 0 #{Rails.root.join(functionfile_name)}`
