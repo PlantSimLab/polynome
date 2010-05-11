@@ -1,10 +1,11 @@
-#!/usr/bin/env perl
+#!/usr/bin/perl
 
 ## Franziska Hinkelmann
 
 # This module must be symlinked to /etc/perl/DVDCore.pm
 package DVDCore;
 use Cwd;
+
 BEGIN {
     use Exporter ();
     our ( $VERSION, @ISA, @EXPORT, @EXPORT_OK, %EXPORT_TAGS );
@@ -49,6 +50,7 @@ our @Functions;
 # $Pwd is set by user to define the current working directory
 our $Pwd;
 our $Polynome;
+our $Stochastic;
 our $Use_log;
 
 #our $Use_log=1;
@@ -86,40 +88,33 @@ END { }
 # dvd_session serves as a wrapper for the DVD interface (think new_dvd11.pl), providing a
 # single method for specifying all of the needed runtime variables
 sub dvd_session {
+	
 
     #set path for graphviz for the server to use, this is necessary, because
     # PATH variable on polymath does not include /usr
-    #$ENV{'PATH'}            = '/usr/local/bin:/bin:/etc:/usr/bin';
+    $ENV{'PATH'}            = '/usr/local/bin:/bin:/etc:/usr/bin';
     $ENV{'LD_LIBRARY_PATH'} = '/usr/local/lib/graphviz';
 
-    # check that ccomps and dot are installed
-#    my $path_to = `which dot`;
-#    if ( $path_to eq "" ) {
-#        return _package_error ("dot is not installed");
-#    }
-#    $path_to = `which ccomps`;
-#    if ( $path_to eq "" ) {
-#        return _package_error ("ccomps is not installed");
-#    }
     # eventually serialize a hash
     # count the arguments
     $count = scalar(@_);
-    my ($n_nodes,               $p_value,           $file_prefix,
+    my ($n_nodes,               $p_value,           $clientip,
         $translate,             $update_sequential, $update_schedule,
         $all_trajectories_flag, $statespace,        $ss_format,
         $regulatory,            $dg_format,         $all_trajectories,
-        $initial_state,         $update_stochastic, $stochastic, $debug
+        $initial_state,         $update_stochastic, $debug
     ) = @_[ 0 .. 14 ];
     $Use_log         = $debug;
     $Current_program = "dvd_session";
 
     #print "\$regulatory $regulatory,";
-    _log("all trajectories: $All_trajectories<br>");
+    print "\n<br>" if ($DEBUG);
+    _log("all trajectories: $All_trajectories");
     _log( "Argument length: " . $count );
     _log( "Arguments: " . join( ", ", @_[ 0 .. 13 ] ) );
     @Output_array  = [];
     $Function_file = $_[-1];
-    $Clientip      = $file_prefix;
+    $Clientip      = $clientip;
     _log( "Clientip is " . $Clientip );
     $N_nodes               = $n_nodes;
     $P_value               = $p_value;
@@ -137,7 +132,6 @@ sub dvd_session {
 
     _log("\$Update_stochastic: $Update_stochastic");
     $Session_on = 1;
-    $Stochastic = $stochastic;
 
     # begin evaluation of input
     if ( ( !$p_value ) & ( !$n_nodes ) ) {
@@ -160,7 +154,7 @@ sub dvd_session {
         }
         else {
             return _package_error(
-                "Please ensure that your file_prefix, $Clientip, corresponds to a file located in $function_file_location."
+                "Please ensure that your clientip, $Clientip, corresponds to a file located in $function_file_location."
             );
         }
     }
@@ -379,6 +373,11 @@ sub error_check {
     foreach (@$function_data) {
         $fn  = 0;
         $max = 1;
+        _log("<BR><BR>$_<BR>");
+        $tmp1 = scalar($_);
+        _log("tmp1 $tmp1<BR>");
+        $tmp2 = scalar( @{$_} );
+        _log("tmp2 $tmp2<BR>");
         if ( scalar($_) =~ /ARRAY/ ) {
             $max = scalar( @{$_} );
             _log( "Attempting to read from an array... (matching) 'ARRAY:' "
@@ -387,9 +386,14 @@ sub error_check {
         }
         until ( $fn == $max ) {
             if ( $max > 1 ) {    #function stochastic
-                $line = ${ @{$_} }[$fn];
+                _log("<BR>Function stochastic<BR>");
+                _log("$fn<BR>");
+                $line =  @{$_}[$fn];
+                #$line = ${ @{$_} }[$fn];
                 $n    = ${ @{ $Function_lines[ $fcount - 1 ] } }[$fn];
-                _log("<br><br>Reading fn $fn, function: $line");
+                _log("<br>Reading fn $fn, function: $line");
+                _log("@{$_}[0]");
+                _log("{@{$_}}[0]");
                 _log("<br>This is called when having multiple functions");
             }
             else {               #not function stochastic
@@ -675,7 +679,7 @@ sub dvd_translator {
     $Current_program = "dvd_translator";
     if ( $Session_on == 1 ) {
         _log("Session_on = 1");
-        my ( $n_nodes, $file_prefix ) = ( $N_nodes, $Clientip );
+        my ( $n_nodes, $clientip ) = ( $N_nodes, $Clientip );
         $function_data = \@Function_data;
     }
     else {
@@ -718,7 +722,7 @@ sub dvd_translator {
 # has all possible connections in it or a graph that shows one possible update
 # for each function
 sub count_comps_final {
-_log("In count_comps_final rapper: $All_trajectories_flag<br>\n");
+    _log("In Count rapper: $All_trajectories_flag");
     if ($All_trajectories_flag) {
         count_comps_final_all_trajectories(@_);
         create_output();
@@ -754,12 +758,12 @@ sub count_comps_final_all_trajectories {
     #		$l = scalar( @{ $Functions[$my_N]} );
     #		_log("SCALAR combinations $combi");
     if ( $Session_on == 1 ) {
-        ( $file_prefix, $n_nodes, $p_value ) = ( $Clientip, $N_nodes, $P_value );
-        _log("session variables = $file_prefix $n_nodes, $p_value");
+        ( $clientip, $n_nodes, $p_value ) = ( $Clientip, $N_nodes, $P_value );
+        _log("session variables = $clientip $n_nodes, $p_value");
         ( $statespace, $ss_format ) = @_;
     }
     else {
-        my ( $file_prefix, $n_nodes, $p_value, $update_sequential,
+        my ( $clientip, $n_nodes, $p_value, $update_sequential,
             $update_schedule, $statespace, $ss_format )
             = @_[ 0 .. -2 ];
         _load_function_data( \$_[-1] );
@@ -768,14 +772,14 @@ sub count_comps_final_all_trajectories {
 
 # error_check(@Function_data)[0] or return $Output_array; # WHERE $Output_array is set by _package_error
     }
-    _log("Got file_prefix as $file_prefix WHERE Session_on = $Session_on");
-    _log("session variables = $file_prefix, $n_nodes, $p_value");
+    _log("Got clientip as $clientip WHERE Session_on = $Session_on");
+    _log("session variables = $clientip, $n_nodes, $p_value");
 
     #now for the main loop.
     #we create a file ip.out.dot describing the state space
 
     ########### what to do here?
-    $dot_filename = _get_filelocation("$file_prefix.out.dot");
+    $dot_filename = _get_filelocation("$clientip.out.dot");
 
   #print ("Got dot_filename as $dot_filename WHERE Session_on = $Session_on");
     open( $Dot_file, ">$dot_filename" )
@@ -816,7 +820,7 @@ sub count_comps_final_all_trajectories {
             else {        #print("0 \t");
             }
         }
-        print("\n");
+        #print("\n");
     }
 
     shift(@fixed_points);
@@ -833,12 +837,13 @@ sub create_output {
 
     # Initialize client side mapping variables needed for commmand
     # line calls
-    my $client_wd = _get_filelocation($file_prefix);
-    `mkdir $client_wd`;
+    my $client_wd = _get_filelocation($clientip);
+    $cwd = getcwd();
+    `mkdir -p $cwd\/$client_wd`;
     `chmod 777 $client_wd`;
-    `mkdir $client_wd/tmp`;
+    `mkdir -p $client_wd/tmp`;
     `chmod 777 $client_wd/tmp`;
-    `mkdir $client_wd/dev`;
+    `mkdir -p $client_wd/dev` ;
     `chmod 777 $client_wd/dev`;
 
     #$pres = `pwd`;
@@ -846,8 +851,10 @@ sub create_output {
     my $pres = "";
 
     # dot_filename is .dot file
-    # count connected componenets
+    # count connected components
     my $s = `gc -c $dot_filename`;
+    print "<br><br>s $s\n<br>" if ($DEBUG);
+    print "<br>" if ($DEBUG);
 
     #remove trailing return
     chomp $s;
@@ -867,7 +874,12 @@ sub create_output {
     $Output_array[3] = $fp;
 
     # each connected component is written to a separated file (/tmp/component)
+    my $cwd = getcwd();  
+    print "current dir $cwd\n<br>" if ($DEBUG);
     `ccomps -x -o $client_wd/tmp/component $dot_filename`;
+    print "return value of ccomps: $? \n<br>" if ($DEBUG);
+    print "ccomps -x -o $client_wd/tmp/component $dot_filename\n<br>" if ($DEBUG);
+    print "return value of ccomps: $? \n<br>" if ($DEBUG);
 
  #store the components in files /tmp/component, /tmp/component_1, etc
  #FIXME: parse output of ccomps -v to get #components, then eliminate gc check
@@ -879,8 +891,11 @@ sub create_output {
     #first process ./tmp/component (stupid naming scheme by ccomps)
     #FIXME: this really should be broken into a procedure
     $size = `grep label $client_wd/tmp/component | wc -l`;
+    print "grep label $client_wd/tmp/component | wc -l\n<br>" if ($DEBUG);	
+    print "$size\n<br>" if ($DEBUG);
     $cycle
         = `sccmap $client_wd/tmp/component 2> $client_wd/dev/null | grep label | wc -l`;
+        print "sccmap $client_wd/tmp/component 2> $client_wd/dev/null | grep label | wc -l\n" if ($DEBUG);
     chomp $size;
     chomp $cycle;
     $size  =~ s/\s+//;
@@ -892,7 +907,7 @@ sub create_output {
 
     $total_size += $size;
 
-    #if $num_comps > 1 then loop over $file_prefix/tmp/component_$i
+    #if $num_comps > 1 then loop over $clientip/tmp/component_$i
 
     for ( $i = 1; $i < $num_comps; $i++ ) {
         $size = `grep label $client_wd/tmp/component_$i | wc -l`;
@@ -942,7 +957,6 @@ sub create_output {
             #$s = `grep label $client_wd/tmp/blah | wc -l`;
             chomp($s);
             $s =~ s/\s+//;
-            _log("\$s: $s");
 
            # convert decimal number $num into array with base p representation
             my @point;
@@ -983,15 +997,12 @@ sub create_output {
         #    if($total_size <= 2**10)
         #    {
         if ( -e $dot_filename ) {
-            ## debug: print "dot -T$fileformat -o $file_prefix.out.$fileformat $file_prefix.out.dot";
             $statespace_filename
-                = _get_filelocation("$file_prefix.out.$ss_format");
+                = _get_filelocation("$clientip.out.$ss_format");
 
-            #print "<br>\$statespace_filename $statespace_filename<br>";
             _log($statespace_filename);
             _log("dot -T$ss_format -o $statespace_filename $dot_filename");
 
-        #print ("dot -T$ss_format -o $statespace_filename $dot_filename<br>");
             `dot -T$ss_format -o $statespace_filename $dot_filename`;
 
             #  $output_array[0] = 1;
@@ -1019,7 +1030,7 @@ sub sim {
     $Current_program = "sim";
     if ( $Session_on == 1 ) {
         _log("Seesion == 1");
-        ( $file_prefix, $n_nodes, $p_value ) = ( $Clientip, $N_nodes, $P_value );
+        ( $clientip, $n_nodes, $p_value ) = ( $Clientip, $N_nodes, $P_value );
         (   $initial_state, $update_sequential, $update_schedule, $statespace,
             $ss_format
         ) = @_;
@@ -1029,7 +1040,7 @@ sub sim {
     }
     else {
         _log("Seesion == 0");
-        (   $file_prefix, $n_nodes, $p_value, $initial_state, $update_sequential,
+        (   $clientip, $n_nodes, $p_value, $initial_state, $update_sequential,
             $update_schedule, $statespace, $ss_format
         ) = @_[ 0 .. -2 ];
         _load_function_data( \$_[-1] );
@@ -1172,10 +1183,10 @@ sub sim {
         $lastval      = $states[$#states];
         $old          = $states[0];
         $total_size   = scalar($states);
-        $dot_filename = _get_filelocation("$file_prefix.graph.dot");
+        $dot_filename = _get_filelocation("$clientip.graph.dot");
         open( $Dot_file, ">$dot_filename" )
             or return _package_error(
-                "Could not open $dot_filename for writing.");
+            "Could not open $dot_filename for writing.");
         print $Dot_file "digraph G{ \n";
         if ( $lastval eq $old ) {
             print $Dot_file "node[style=filled, color=cyan]\;\n";
@@ -1207,7 +1218,7 @@ sub sim {
         if ( $total_size <= 1000 ) {
             if ( -e $dot_filename ) {
                 $statespace_filename
-                    = _get_filelocation("$file_prefix.graph.$ss_format");
+                    = _get_filelocation("$clientip.graph.$ss_format");
                 `dot -T$ss_format -o $statespace_filename $dot_filename`;
                 $Output_array[6] = $statespace_filename;
             }
@@ -1227,25 +1238,22 @@ sub sim {
 # derived from regulatory.pl. This function generates a dependency graph for the network
 sub regulatory {
     $Current_program = "regulatory";
-    my ( $file_prefix, $n_nodes, $dg_format );
+    my ( $clientip, $n_nodes, $dg_format );
     if ($Session_on) {
 
         #print" Session on<br>";
-        ( $file_prefix, $n_nodes ) = ( $Clientip, $N_nodes );
+        ( $clientip, $n_nodes ) = ( $Clientip, $N_nodes );
         ($dg_format) = $_[0];
     }
     else {
 
         #print" Session off<br>";
-        my ( $file_prefix, $n_nodes, $dg_format ) = ( @_[ 0 .. 1 ], $_[-1] );
+        my ( $clientip, $n_nodes, $dg_format ) = ( @_[ 0 .. 1 ], $_[-1] );
         _load_function_data( \$_[-2] );
         error_check(@Function_data) or return $Output_array;
     }
 
-    my $dot_filename = _get_filelocation("$file_prefix.wiring-diagram.dot");
-    #my $dot_filename = _get_filelocation("$file_prefix.out1.dot");
-    _log ("Right here<br><br>");
-    _log (getcwd);
+    my $dot_filename = _get_filelocation("$clientip.out1.dot");
     open( $Dot_file, ">$dot_filename" )
         or return _package_error("Could not open $dot_filename for writing.");
     print $Dot_file "digraph test {\n";
@@ -1282,7 +1290,8 @@ sub regulatory {
             #print("}<br>");
         }
         else {
-            print "ERROR this should not happen";
+            print "ERROR this should not happen\n<BR>";
+            print "Are you maybe using the wrong perl version? Retry with 5.8\n<BR>";
 
             #print($_);
         }
@@ -1291,10 +1300,11 @@ sub regulatory {
     print $Dot_file "}";
     close($Dot_file);
 
-    $dot_filename2 = _get_filelocation("$file_prefix.out2.dot");
-    _log("`export LANG=EN; sort -u $dot_filename > $dot_filename2`");
+    $dot_filename2 = _get_filelocation("$clientip.out2.dot");
+    _log("`sort -u $dot_filename > $dot_filename2`");
     _log("Removing double arrows from $dot_filename2");
-    `export LANG=EN; sort -u $dot_filename > $dot_filename2`;
+    `sort -u $dot_filename > $dot_filename2`;
+    #`mv $dot_filename $dot_filename2`;
     `rm -f $dot_filename`;
     $dot_filename = $dot_filename2;
 
@@ -1325,8 +1335,7 @@ sub regulatory {
 
     # make the graph
     if ( -e $dot_filename ) {
-        #$digraph_filename = _get_filelocation("$file_prefix.out1.$dg_format");
-        $digraph_filename = _get_filelocation("$file_prefix.wiring-diagram.$dg_format");
+        $digraph_filename = _get_filelocation("$clientip.out1.$dg_format");
         _log("dot -T$dg_format -o $digraph_filename $dot_filename");
         `dot -T$dg_format -o $digraph_filename $dot_filename`;
 
