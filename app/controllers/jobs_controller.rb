@@ -230,10 +230,18 @@ class JobsController < ApplicationController
             self.sgfan(discretized_datafiles, @p_value, @job.nodes)
             generate_picture = true
           #else
-            logger.warn("internal error: should not be here because we checked
-            for this error before")
+            #logger.warn("internal error: should not be here because we checked for this error before")
           #end
         end
+        # overwrite functions with given functions
+        input_function_file = "public/perl/" + @job.file_prefix + ".input_function.txt"
+        File.open(Rails.root.join(input_function_file)).each {|line|
+          case line
+          when /^\s*f[1-#{@job.nodes}]\s*=\s*x/ # we are assuming this is a correct line
+            variable = line.match(/^\s*f(\d+)/)[1]
+            logger.info("overwriting function for variable #{variable}")
+          end
+        }
       end
       
       if generate_picture 
@@ -281,9 +289,6 @@ class JobsController < ApplicationController
           # after simulating just one network copy the multiple networks into
           # the function file that the user can display
           File.copy(multiple_functionfile, Rails.root.join(functionfile_name) )
-
-        else
-          logger.info "Multiple file does not exist"
         end
       end
       self.write_done_file("1",  simulation_output)
