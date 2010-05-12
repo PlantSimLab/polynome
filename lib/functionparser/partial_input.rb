@@ -3,13 +3,18 @@
 
 class PartialInput  
   def self.parse s
+    functions = Hash.new
+
     s.each {|line|
       case line
         when /^\s*f\d+\s*=\s*(x\d+(\s*\^\s*\d+)?|(0|1))\s*((\+|\*)\s*(x\d+(\s*\^\s*\d+)?|(0|1))\s*)*\s*$/
           # we are assuming this is a correct line without checking the bounds for subscripts
           input_f = true 
-          variable = line.match(/^\s*f(\d+)/)[1]
-          puts ("overwriting function for variable #{variable}")
+          variable = line.match(/^\s*f(\d+)/)[1].to_i
+          function= line.match(/^.*=\s*(.*)/)[1]
+          puts "f#{variable} = #{function}"
+          functions[variable] = function
+          puts "overwriting function for variable #{variable}"
           next
         when /^\s*$/
           next
@@ -20,4 +25,35 @@ class PartialInput
     }
     true 
   end
+
+
+  # if the string given is good function data, return a hash with the functions for the variables listed, otherwise return nil
+  def self.parse_into_hash s
+    functions = Hash.new
+
+    s.each {|line|
+      case line
+        when /^\s*f\d+\s*=\s*(x\d+(\s*\^\s*\d+)?|(0|1))\s*((\+|\*)\s*(x\d+(\s*\^\s*\d+)?|(0|1))\s*)*\s*$/
+          # we are assuming this is a correct line without checking the bounds for subscripts
+          variable = line.match(/^\s*f(\d+)/)[1].to_i
+          function= line.match(/^.*=\s*(.*)/)[1]
+          puts "f#{variable} = #{function}"
+          functions[variable] = function
+          puts "overwriting function for variable #{variable}"
+          next
+        when /^\s*$/
+          # empty lines are ok 
+          next
+        else 
+          puts ("bad line")
+          return nil 
+      end
+    }
+    if functions.empty? 
+      nil
+    else 
+      functions
+    end
+  end
+    
 end
