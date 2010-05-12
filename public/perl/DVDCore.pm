@@ -839,7 +839,7 @@ sub create_output {
     # line calls
     my $client_wd = _get_filelocation($clientip);
     $cwd = getcwd();
-    `mkdir -p $cwd\/$client_wd`;
+    `mkdir -p $client_wd`;
     `chmod 777 $client_wd`;
     `mkdir -p $client_wd/tmp`;
     `chmod 777 $client_wd/tmp`;
@@ -1253,7 +1253,7 @@ sub regulatory {
         error_check(@Function_data) or return $Output_array;
     }
 
-    my $dot_filename = _get_filelocation("$clientip.out1.dot");
+    my $dot_filename = _get_filelocation("$clientip.wiring_diagram.dot");
     open( $Dot_file, ">$dot_filename" )
         or return _package_error("Could not open $dot_filename for writing.");
     print $Dot_file "digraph test {\n";
@@ -1335,7 +1335,7 @@ sub regulatory {
 
     # make the graph
     if ( -e $dot_filename ) {
-        $digraph_filename = _get_filelocation("$clientip.out1.$dg_format");
+        $digraph_filename = _get_filelocation("$clientip.wiring-diagram.$dg_format");
         _log("dot -T$dg_format -o $digraph_filename $dot_filename");
         `dot -T$dg_format -o $digraph_filename $dot_filename`;
 
