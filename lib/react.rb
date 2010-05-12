@@ -24,23 +24,23 @@ module React
           # write the top 10 models into the file
           for i in 1..10 do 
             line = file.gets
-            logger.info "model.txt \# #{line}"
+            #logger.info "model.txt \# #{line}"
             unless (line.match( /^Model/ ))
                 logger.info "ERROR: React did not create a model file starting with Model."
                 return
             end
             while line = file.gets
-                logger.info "model.txt Model #{i}"
+                #logger.info "model.txt Model #{i}"
                 if (line.match( /^\s*f/ ))
-                    logger.info "Line matches fx"
+                    #logger.info "Line matches fx"
                     long_out_file.write(line)
                     if i == 1
                       out_file.write(line)
                     end
                 elsif (line.match( /^\s*H/ ))
-                    logger.info "Line matches H"
+                    #logger.info "Line matches H"
                 elsif (line.match( /^\s*$/))
-                    logger.info "Line matches newline"
+                    #logger.info "Line matches newline"
                     long_out_file.write(line)
                     break
                 else

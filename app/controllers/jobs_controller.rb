@@ -1,5 +1,8 @@
 require 'digest/md5'
 require 'ftools'
+require "functionparser/partial_input"
+require 'pp'
+
 
 include React
 include Spawn
@@ -233,25 +236,38 @@ class JobsController < ApplicationController
             #logger.warn("internal error: should not be here because we checked for this error before")
           #end
         end
+
         # overwrite functions with given functions
         input_function_file = "public/perl/" + @job.file_prefix + ".input_function.txt"
 
-        input_f = false
-        File.open(Rails.root.join(input_function_file)).each {|line|
-          case line
-          when /^\s*f[1-#{@job.nodes}]\s*=\s*x\d+(\s*\^\s*\d+)?\s*((\+|\*)\s*x\d+(\s*\^\s*\d+)?\s*)*\s*$/
-            # we are assuming this is a correct line without checking the bounds for subscripts
-            input_f = true 
-            variable = line.match(/^\s*f(\d+)/)[1]
-            logger.info("overwriting function for variable #{variable}")
-          end
+        partial_input = Hash.new
+        partial_input = PartialInput.parse_into_hash File.open(Rails.root.join(input_function_file))
+        logger.info "### Partial Input ###"
+        logger.info partial_input 
 
-          if input_f
-            logger.info("variable #{variable}")
-            functionfile_name = self.functionfile_name(@job.file_prefix)
-            logger.info "Functionfile : " + functionfile_name
-          end
-        }
+
+        if !partial_input.nil? 
+
+          functionfile_name = self.functionfile_name(@job.file_prefix)
+          functions = Hash.new
+          functions = PartialInput.parse_into_hash File.open(Rails.root.join(functionfile_name))
+          partial_input.each { |variable,function|
+            functions[variable] = function
+          }
+
+          # write functions to functionfile
+          File.open(Rails.root.join(functionfile_name), 'w') { |out|
+            functions.each { |k,v| 
+              out << "f#{k} = #{v}\n"
+            }
+          }
+
+          File.open(Rails.root.join(functionfile_name)).each{ |line| 
+            logger.info line
+          }
+
+        end
+
       end
       
       if generate_picture 
