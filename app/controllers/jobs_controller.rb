@@ -260,6 +260,7 @@ class JobsController < ApplicationController
           
         show_probabilities_state_space = @job.show_probabilities_state_space ?  "1" : "0"
         wiring_diagram = @job.wiring_diagram ? "1" : "0"
+        logger.info ("wiring_diagram #{wiring_diagram}")
         state_space = @job.state_space ? "1" : "0"
 
         # for synchronous updates or stochastic sequential updates
