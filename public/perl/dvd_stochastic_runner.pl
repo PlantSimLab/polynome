@@ -86,11 +86,7 @@ _log("Attempted to read from '$stochastic_input_file'");
 
 my $Pwd = getcwd();
 
-my @response = dvd_session($n_nodes, $p_value, $file_prefix, 0,
-$update_sequential_flag, $update_schedule, $all_trajectories_flag,
-$show_statespace, $statespace_format, $show_wiring_diagram, $wiring_diagram_format,
-$trajectory_flag, $trajectory_value, $update_stochastic_flag, $Stochastic, $DEBUG,
-$function_file);
+my @response = dvd_session($n_nodes, $p_value, $file_prefix, 0, $update_sequential_flag, $update_schedule, $all_trajectories_flag, $show_statespace, $statespace_format, $show_wiring_diagram, $wiring_diagram_format, $trajectory_flag, $trajectory_value, $update_stochastic_flag, $Stochastic, $DEBUG, $function_file); 
 
 if($response[0] == 1) { # a response code should always be returned by the main DVDCore functions
     _log($_) foreach(@Output_array);
