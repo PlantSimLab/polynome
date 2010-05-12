@@ -235,11 +235,21 @@ class JobsController < ApplicationController
         end
         # overwrite functions with given functions
         input_function_file = "public/perl/" + @job.file_prefix + ".input_function.txt"
+
+        input_f = false
         File.open(Rails.root.join(input_function_file)).each {|line|
           case line
-          when /^\s*f[1-#{@job.nodes}]\s*=\s*x/ # we are assuming this is a correct line
+          when /^\s*f[1-#{@job.nodes}]\s*=\s*x\d+(\s*\^\s*\d+)?\s*((\+|\*)\s*x\d+(\s*\^\s*\d+)?\s*)*\s*$/
+            # we are assuming this is a correct line without checking the bounds for subscripts
+            input_f = true 
             variable = line.match(/^\s*f(\d+)/)[1]
             logger.info("overwriting function for variable #{variable}")
+          end
+
+          if input_f
+            logger.info("variable #{variable}")
+            functionfile_name = self.functionfile_name(@job.file_prefix)
+            logger.info "Functionfile : " + functionfile_name
           end
         }
       end
