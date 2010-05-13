@@ -242,12 +242,9 @@ class JobsController < ApplicationController
 
         partial_input = Hash.new
         partial_input = PartialInput.parse_into_hash File.open(Rails.root.join(input_function_file))
-        logger.info "### Partial Input ###"
         logger.info partial_input 
 
-
         if !partial_input.nil? 
-
           functionfile_name = self.functionfile_name(@job.file_prefix)
           functions = Hash.new
           functions = PartialInput.parse_into_hash File.open(Rails.root.join(functionfile_name))
@@ -256,16 +253,14 @@ class JobsController < ApplicationController
           }
 
           # write functions to functionfile
-          File.open(Rails.root.join(functionfile_name), 'w') { |out|
-            functions.each { |k,v| 
-              out << "f#{k} = #{v}\n"
-            }
-          }
+          File.open(Rails.root.join(functionfile_name), 'w') { |out| functions.each { |k,v| out << "f#{k} = #{v}\n" } }
+          multiple_functionfile = Rails.root.join(functionfile_name.gsub("functionfile", "multiplefunctionfile"))
+          if FileTest.exists?(multiple_functionfile)
+            logger.info "Multiple file exists #{multiple_functionfile}"
+            new_multifle = PartialInput.overwrite_multifile(partial_input, File.open(multiple_functionfile))
 
-          File.open(Rails.root.join(functionfile_name)).each{ |line| 
-            logger.info line
-          }
-
+          end
+          File.open(multiple_functionfile, 'w') { |out| new_multifle.each {|line| out << line}}
         end
 
       end
@@ -313,6 +308,8 @@ class JobsController < ApplicationController
         logger.info multiple_functionfile
         if FileTest.exists?(multiple_functionfile)
           logger.info "Multiple file exists"
+
+
           # after simulating just one network copy the multiple networks into
           # the function file that the user can display
           File.copy(multiple_functionfile, Rails.root.join(functionfile_name) )

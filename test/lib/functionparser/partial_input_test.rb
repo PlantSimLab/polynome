@@ -57,5 +57,27 @@ f2=    0"
     incorrect = "Hello!"
     assert_nil (PartialInput.parse_into_hash incorrect)
   end
+
+  def test_multifile
+    correct = "f1 = x1+x4"
+    multifile = "f1 = x1
+f2 = x1
+
+f1 = x1
+f2 = x1
+
+f1 = x1
+f2 = x1"
+  f = PartialInput.parse_into_hash correct
+  out = PartialInput.overwrite_multifile(f, multifile)
+  assert_equal( "f1 = x1+x4
+f2 = x1
+
+f1 = x1+x4
+f2 = x1
+
+f1 = x1+x4
+f2 = x1", out) 
+  end
   
 end

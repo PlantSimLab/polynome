@@ -32,5 +32,24 @@ class PartialInput
       functions
     end
   end
+
+  # overwrite all fi in multifile with functions[i]
+  def self.overwrite_multifile(functions, multifile)
+    m = Hash.new
+    multifile.each_with_index{ |line, index|
+      m[index] = line
+    }
+    m.each{ |k,v|
+      match = v.match(/^\s*f(\d+)\s*=/)
+      if !match.nil?
+        variable = match[1].to_i
+        if functions.has_key?(variable)
+          m[k] = "f#{variable} = #{functions[variable]}\n"
+          puts "replaced m[#{k}] with #{m[k]}"
+        end
+      end
+    }
+    m.sort.collect{|pair|pair[1]}.to_s
+  end
     
 end
