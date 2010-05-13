@@ -33,7 +33,7 @@ module React
                 #logger.info "model.txt Model #{i}"
                 if (line.match( /^\s*f/ ))
                     #logger.info "Line matches fx"
-                    long_out_file.write(line)
+                    long_out_file.write(line.lstrip)
                     if i == 1
                       out_file.write(line)
                     end
