@@ -34,9 +34,9 @@ class PartialInput
   end
 
   # overwrite all fi in multifile with functions[i]
-  def self.overwrite_multifile(functions, multifile)
+  def self.overwrite_file(functions, myfile)
     m = Hash.new
-    multifile.each_with_index{ |line, index|
+    myfile.each_with_index{ |line, index|
       m[index] = line
     }
     m.each{ |k,v|

@@ -140,10 +140,26 @@ class JobsController < ApplicationController
 
     if ( @job.state_space && @job.nodes > n_simulation_threshold )
         logger.info "Too many variables to simulate"
-        @error_message = "Too many variables to simulate, running all
-        computations but the simulations. "
+        @error_message = "Too many variables to simulate, running all computations but the simulations. "
         @job.state_space = false
         self.write_done_file("0", "<font color=red>" +  @error_message+ "</font><br> ") 
+    end
+        
+    # overwrite functions with given functions
+    input_function_file = "public/perl/" + @job.file_prefix + ".input_function.txt"
+        
+    if FileTest.exists?(Rails.root.join(input_function_file))
+      partial_input = Hash.new
+      partial_input = PartialInput.parse_into_hash File.open(Rails.root.join(input_function_file))
+      logger.info partial_input 
+
+      if partial_input.nil? 
+        @error_message = "Partial information about input functions incorrect."
+        logger.warn "Error: partial information about input functions incorrect"
+        self.write_done_file("2", "<font color=red>" +  @error_message + "</font><br> ")
+        @error_message = ""
+        return 
+      end
     end
 
     spawn do
@@ -237,32 +253,20 @@ class JobsController < ApplicationController
           #end
         end
 
-        # overwrite functions with given functions
-        input_function_file = "public/perl/" + @job.file_prefix + ".input_function.txt"
-
-        partial_input = Hash.new
-        partial_input = PartialInput.parse_into_hash File.open(Rails.root.join(input_function_file))
-        logger.info partial_input 
-
         if !partial_input.nil? 
           functionfile_name = self.functionfile_name(@job.file_prefix)
-          functions = Hash.new
-          functions = PartialInput.parse_into_hash File.open(Rails.root.join(functionfile_name))
-          partial_input.each { |variable,function|
-            functions[variable] = function
-          }
+          new_functions = PartialInput.overwrite_file(partial_input, File.open(Rails.root.join(functionfile_name)))
 
           # write functions to functionfile
-          File.open(Rails.root.join(functionfile_name), 'w') { |out| functions.each { |k,v| out << "f#{k} = #{v}\n" } }
+          File.open(Rails.root.join(functionfile_name), 'w') { |out| new_functions.each {|line| out << line}}
+          
           multiple_functionfile = Rails.root.join(functionfile_name.gsub("functionfile", "multiplefunctionfile"))
           if FileTest.exists?(multiple_functionfile)
             logger.info "Multiple file exists #{multiple_functionfile}"
-            new_multifle = PartialInput.overwrite_multifile(partial_input, File.open(multiple_functionfile))
-
+            new_multifle = PartialInput.overwrite_file(partial_input, File.open(multiple_functionfile))
+            File.open(multiple_functionfile, 'w') { |out| new_multifle.each {|line| out << line}}
           end
-          File.open(multiple_functionfile, 'w') { |out| new_multifle.each {|line| out << line}}
         end
-
       end
       
       if generate_picture 
@@ -440,8 +444,8 @@ class JobsController < ApplicationController
       :m2_wait => 1
       )
     if (File.zero?(consistent_datafile))
-       logger.info "Time course was bad and after througing out inconsistent time courses nothing was left. Maybe you need to choose a different type of model."
-       @error_message  = "Time course was bad and after througing out inconsistent time courses nothing was left. Maybe you need to choose a different type of model."
+       logger.info "Time course was bad and after throwing out inconsistent time courses nothing was left. Maybe you need to choose a different type of model."
+       @error_message  = "Time course was bad and after throwing out inconsistent time courses nothing was left. Maybe you need to choose a different type of model."
        self.write_done_file("2", "<font color=red>" +  @error_message + "</font><br> ") 
        @error_message = ""
        return NIL 
