@@ -24,6 +24,7 @@ class PartialInput
       end
       if line.match /(\{)/
         puts "this should be {: #{$1}"
+        functions[variable] = functions[variable] + "{\n"
         function_list_state = true
       end
       if (function = line.match /((x\d+(\^\d+)?)|0|1)((\+|\*)((x\d+(\^\d+)?)|0|1))*(\#\d+)?/ )
@@ -43,6 +44,7 @@ class PartialInput
           puts "there is a closing } without being opened before"
           return nil
         end
+        functions[variable] = functions[variable] + "}\n"
         function_list_state = false
         function_state = false
       end
@@ -62,21 +64,21 @@ class PartialInput
 
   # overwrite all fi in multifile with functions[i]
   def self.overwrite_file(functions, myfile)
-    m = Hash.new
-    myfile.each_with_index{ |line, index|
-      m[index] = line
-    }
-    m.each{ |k,v|
-      match = v.match(/^\s*f(\d+)\s*=/)
-      if !match.nil?
-        variable = match[1].to_i
-        if functions.has_key?(variable)
-          m[k] = "f#{variable} = #{functions[variable]}\n"
-          puts "replaced m[#{k}] with #{m[k]}"
-        end
+    m = parse_into_hash myfile
+    
+    #m = Hash.new
+    #myfile.each_with_index{ |line, index|
+    #  m[index] = line
+    #}
+
+    m.each{ |variable,function|
+      if functions.has_key?(variable)
+        m[variable] = functions[variable]
+        puts "replaced m[#{variable}] with #{m[variable]}"
       end
     }
-    m.sort.collect{|pair|pair[1]}.to_s
+    pp m
+    m.collect{ |k,v| "f#{k} = #{v}\n"}.to_s
   end
     
 end

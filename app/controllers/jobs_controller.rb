@@ -148,7 +148,6 @@ class JobsController < ApplicationController
     # overwrite functions with given functions
     input_function_file = "public/perl/" + @job.file_prefix + ".input_function.txt"
         
-      logger.info "##########"
     if FileTest.exists?(Rails.root.join(input_function_file))
       partial_input = Hash.new
       partial_input = PartialInput.parse_into_hash File.open(Rails.root.join(input_function_file))
@@ -259,15 +258,23 @@ class JobsController < ApplicationController
           logger.info "Partial Function information"
           functionfile_name = self.functionfile_name(@job.file_prefix)
           new_functions = PartialInput.overwrite_file(partial_input, File.open(Rails.root.join(functionfile_name)))
+          logger.info "###############"
+          logger.info new_functions
 
           # write functions to functionfile
-          File.open(Rails.root.join(functionfile_name), 'w') { |out| new_functions.each {|line| out << line}}
+          logger.info functionfile_name
+          File.open(Rails.root.join(functionfile_name), 'w') { |out| 
+            new_functions.each {|line| 
+              out << line
+              logger.info line
+            }
+          }
           
           multiple_functionfile = Rails.root.join(functionfile_name.gsub("functionfile", "multiplefunctionfile"))
           if FileTest.exists?(multiple_functionfile)
             logger.info "Multiple file exists #{multiple_functionfile}"
-            new_multifle = PartialInput.overwrite_file(partial_input, File.open(multiple_functionfile))
-            File.open(multiple_functionfile, 'w') { |out| new_multifle.each {|line| out << line}}
+            new_multifile = PartialInput.overwrite_file(partial_input, File.open(multiple_functionfile))
+            File.open(multiple_functionfile, 'w') { |out| new_multifile.each {|line| out << line}}
           end
         end
       end

@@ -83,23 +83,23 @@ f2=    0"
   def test_overwrite_file
     correct = "f1 = x1+x4"
     myfile = "f1 = x1
-f2 = x1
+f2 = x2
 
 f1 = x1
-f2 = x1
+f2 = x2
 
 f1 = x1
-f2 = x1"
+f2 = x2"
   f = PartialInput.parse_into_hash correct
   out = PartialInput.overwrite_file(f, myfile)
   assert_equal( "f1 = x1+x4
-f2 = x1
+f2 = x2\n", out)
 
-f1 = x1+x4
-f2 = x1
-
-f1 = x1+x4
-f2 = x1", out) 
+#f1 = x1+x4
+#f2 = x2
+#
+#f1 = x1+x4
+#f2 = x2", out) 
   end
   
 end
