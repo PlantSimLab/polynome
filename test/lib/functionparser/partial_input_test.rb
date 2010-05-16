@@ -52,6 +52,28 @@ f3 = 1+0*1+   1 *0
 f2=    0"
     assert_not_nil PartialInput.parse_into_hash correct
   end
+
+  def test_parser_on_correct_stochastic_input
+    correct = "f2 = x1+x4+1
+f1 = { x3^2 +0 +1 +x1*1*x1 }
+f5= { 1+x1+x3^2
+x3^2
+x1+x3^2 }
+f4= { 1+x1+x3^2
+x3^2
+x1+x3^2
+}
+f7 = { 1+x1+x3^2 # 0.2
+  x3^2 # .1
+x1+x3^2#.7 }
+  f6={ 1+x1+x3^2 # 0.2
+    x3^2 # .1
+x1+x3^2 #.7
+}
+f3 = 1+0*1+   1 *0
+f2=    0"
+    assert_not_nil PartialInput.parse_into_hash correct
+  end
   
   def test_parser_on_false_input
     incorrect = "Hello!"

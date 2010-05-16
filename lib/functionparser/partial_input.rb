@@ -7,24 +7,51 @@ class PartialInput
   def self.parse_into_hash s
     puts s
     functions = Hash.new
-
+    function_list_state = false
+    function_state = false
+    variable = 0
     s.each {|line|
-      case line
-        when /^\s*f\d+\s*=\s*(x\d+(\s*\^\s*\d+)?|(0|1))\s*((\+|\*)\s*(x\d+(\s*\^\s*\d+)?|(0|1))\s*)*\s*$/
-          # we are assuming this is a correct line without checking the bounds for subscripts
-          variable = line.match(/^\s*f(\d+)/)[1].to_i
-          function= line.match(/^.*=\s*(.*)/)[1]
-          puts "f#{variable} = #{function}"
-          functions[variable] = function
-          puts "overwriting function for variable #{variable}"
-          next
-        when /^\s*$/
-          # empty lines are ok 
-          next
-        else 
-          puts ("bad line :#{line}:")
-          return nil 
+      line.gsub!(/\s/, '')
+      # we are assuming this is a correct line without checking the bounds for subscripts
+      #when /^\s*f\d+\s*=\s*(x\d+(\s*\^\s*\d+)?|(0|1))\s*((\+|\*)\s*(x\d+(\s*\^\s*\d+)?|(0|1))\s*)*\s*$/
+      if line.match /^f(\d+)=(.*)$/
+        variable = $1.to_i
+        puts "starting with variable #{variable}"
+        functions[variable] = ""
+        line = $2
+        puts "This is the rest of the line #{line}"
+        function_state = true
       end
+      if line.match /(\{)/
+        puts "this should be {: #{$1}"
+        function_list_state = true
+      end
+      if (function = line.match /((x\d+(\^\d+)?)|0|1)((\+|\*)((x\d+(\^\d+)?)|0|1))*(\#\d+)?/ )
+        puts "Found function #{function}"
+        puts function.to_s
+        pp function
+        puts variable
+        if !function_state
+          puts "some error..." 
+          return nil
+        end
+        functions[variable] = functions[variable] + function.to_s # +"\n"
+        puts "functions[variable]: #{functions[variable]}"
+      end
+      if line.match /\}\s*$/
+        if !function_list_state
+          puts "there is a closing } without being opened before"
+          return nil
+        end
+        function_list_state = false
+        function_state = false
+      end
+#      when /^\s*$/   # empty lines are ok 
+#        next
+#      else 
+#        puts "bad line :#{line}:"
+#        return nil 
+#      end
     }
     if functions.empty? 
       nil
