@@ -1303,8 +1303,8 @@ sub regulatory {
     $dot_filename2 = _get_filelocation("$clientip.out2.dot");
     _log("`sort -u $dot_filename > $dot_filename2`");
     _log("Removing double arrows from $dot_filename2");
-    `sort -u $dot_filename > $dot_filename2`;
-    #`mv $dot_filename $dot_filename2`;
+    #`sort -u $dot_filename > $dot_filename2`;
+    `mv $dot_filename $dot_filename2`;
     `rm -f $dot_filename`;
     $dot_filename = $dot_filename2;
 

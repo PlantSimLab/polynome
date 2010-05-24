@@ -20,7 +20,6 @@ ActiveRecord::Schema.define(:version => 20100511223824) do
     t.boolean  "show_discretized"
     t.boolean  "show_functions"
     t.string   "input_data"
-    t.string   "function_data"
     t.boolean  "show_probabilities_wiring_diagram"
     t.boolean  "show_probabilities_state_space"
     t.boolean  "is_deterministic"
@@ -29,6 +28,13 @@ ActiveRecord::Schema.define(:version => 20100511223824) do
     t.datetime "created_at"
     t.datetime "updated_at"
     t.string   "input_function"
+  end
+
+  create_table "posts", :force => true do |t|
+    t.string   "title"
+    t.text     "body"
+    t.datetime "created_at"
+    t.datetime "updated_at"
   end
 
 end
