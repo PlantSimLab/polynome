@@ -36,7 +36,8 @@ class PartialInput
           puts "some error..." 
           return nil
         end
-        functions[variable] = functions[variable] + function.to_s # +"\n"
+        functions[variable] = "#{functions[variable]}#{function}\n"
+        #functions[variable] = functions[variable] + (function.to_s  +"\n")
         puts "functions[variable]: #{functions[variable]}"
       end
       if line.match /\}\s*$/
@@ -44,7 +45,7 @@ class PartialInput
           puts "there is a closing } without being opened before"
           return nil
         end
-        functions[variable] = functions[variable] + "}\n"
+        functions[variable] = functions[variable] + "}"
         function_list_state = false
         function_state = false
       end
@@ -78,7 +79,7 @@ class PartialInput
       end
     }
     pp m
-    m.collect{ |k,v| "f#{k} = #{v}\n"}.to_s
+    m.collect{ |k,v| "f#{k} = #{v}"}.to_s
   end
     
 end
