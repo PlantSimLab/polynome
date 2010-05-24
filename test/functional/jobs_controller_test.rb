@@ -21,8 +21,8 @@ class JobsControllerTest < ActionController::TestCase
     assert_difference('Job.count') do 
         get :index 
     end
-    print jobs(:one).input_data 
-    print jobs(:one).to_s
+    #print jobs(:one).input_data 
+    #print jobs(:one).to_s
     assert_response :success
    end
   

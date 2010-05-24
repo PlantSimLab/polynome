@@ -4,10 +4,6 @@ require 'pp'
 
 class TestPartialInput < ActiveSupport::TestCase
   
-  def test_dummy_partial
-    assert true
-  end
-
   def test_read_line
     f = "this is line 1
 this is line 2
@@ -25,9 +21,15 @@ f2=    0"
 
 
   def test_parser_on_empty_input
-    correct = ""
+    correct = "    "
     functions = PartialInput.parse_into_hash correct
-    assert_nil functions
+    assert functions.empty?
+    correct = "  \n  "
+    functions = PartialInput.parse_into_hash correct
+    assert functions.empty?
+    correct = "\n\n\t  \n"
+    functions = PartialInput.parse_into_hash correct
+    assert functions.empty?
   end
   
   def test_parser_on_correct_input
@@ -117,7 +119,8 @@ x3
 f2 = {
 x2
 x3
-}", out)
+}
+", out)
   end
   
 end

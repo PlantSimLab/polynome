@@ -5,16 +5,19 @@ class PartialInput
 
   # if the string given is good function data, return a hash with the functions for the variables listed, otherwise return nil
   def self.parse_into_hash s
-    puts s
+    #puts "begin parse_into_hash"
+    #puts ":#{s}:"
     functions = Hash.new
     function_list_state = false
     function_state = false
+    good_line = false
     variable = 0
     s.each {|line|
       line.gsub!(/\s/, '')
       # we are assuming this is a correct line without checking the bounds for subscripts
       #when /^\s*f\d+\s*=\s*(x\d+(\s*\^\s*\d+)?|(0|1))\s*((\+|\*)\s*(x\d+(\s*\^\s*\d+)?|(0|1))\s*)*\s*$/
       if line.match /^f(\d+)=(.*)$/
+        good_line = true
         variable = $1.to_i
         puts "starting with variable #{variable}"
         functions[variable] = ""
@@ -23,11 +26,13 @@ class PartialInput
         function_state = true
       end
       if line.match /(\{)/
+        good_line = true
         puts "this should be {: #{$1}"
         functions[variable] = functions[variable] + "{\n"
         function_list_state = true
       end
       if (function = line.match /((x\d+(\^\d+)?)|0|1)((\+|\*)((x\d+(\^\d+)?)|0|1))*(\#\d+)?/ )
+        good_line = true
         puts "Found function #{function}"
         puts function.to_s
         pp function
@@ -41,22 +46,21 @@ class PartialInput
         puts "functions[variable]: #{functions[variable]}"
       end
       if line.match /\}\s*$/
+        good_line = true
         if !function_list_state
           puts "there is a closing } without being opened before"
           return nil
         end
-        functions[variable] = functions[variable] + "}"
+        functions[variable] = functions[variable] + "}\n"
         function_list_state = false
         function_state = false
       end
-#      when /^\s*$/   # empty lines are ok 
-#        next
-#      else 
-#        puts "bad line :#{line}:"
-#        return nil 
-#      end
+      if line.match /^\s*$/ # empty lines are ok
+        puts "found an empty line"
+        good_line = true
+      end
     }
-    if functions.empty? 
+    if !good_line
       nil
     else 
       functions

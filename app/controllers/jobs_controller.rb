@@ -147,19 +147,21 @@ class JobsController < ApplicationController
         
     # overwrite functions with given functions
     input_function_file = "public/perl/" + @job.file_prefix + ".input_function.txt"
-        
-    if FileTest.exists?(Rails.root.join(input_function_file))
-      partial_input = Hash.new
-      partial_input = PartialInput.parse_into_hash File.open(Rails.root.join(input_function_file))
-      logger.info "##########"
-      logger.info partial_input 
+    
+    unless File.zero?(Rails.root.join(input_function_file))
+      if FileTest.exists?(Rails.root.join(input_function_file))
+        partial_input = Hash.new
+        partial_input = PartialInput.parse_into_hash File.open(Rails.root.join(input_function_file))
+        logger.info "##########"
+        logger.info partial_input 
 
-      if partial_input.nil? 
-        @error_message = "Partial information about input functions incorrect."
-        logger.warn "Error: partial information about input functions incorrect"
-        self.write_done_file("2", "<font color=red>" +  @error_message + "</font><br> ")
-        @error_message = ""
-        return 
+        if partial_input.nil? 
+          @error_message = "Partial information about input functions incorrect."
+          logger.warn "Error: partial information about input functions incorrect"
+          self.write_done_file("2", "<font color=red>" +  @error_message + "</font><br> ")
+          @error_message = ""
+          return 
+        end
       end
     end
 
