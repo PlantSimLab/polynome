@@ -12,6 +12,7 @@
     <ul>
         <li><a href="#N">Number of nodes</a>
         <li><a href="#F">Format of the input data</a>
+        <li><a href="#P">Format of the partial input functions (optional)</a>
     </ul>
 
 <h3>Supporting Algorithms/Procedures</h3>
@@ -94,38 +95,34 @@ Polynome accepts numerical data (floating point or multi-state) in table format:
 
 <p>Polynome is capable of handling multiple data sets.  Each data set is preceded by a line beginning with a hash mark (#).  Any characters following the hash mark in the same line are treated as user comments and are therefore ignored by the software.</p>
 
-<table align ="center" width="25%">
-    <tr><td colspan="3">#First time series</td></tr>
-    <tr>
-        <td>1.1</td>      <td>2.8</td>      <td>3.4</td>
-    </tr>
-    <tr>
-        <td>2.5</td>      <td>1.2</td>      <td>3.3</td>
-    </tr>
-    <tr>
-        <td>3.2</td>      <td>2.1</td>      <td>2.4</td>
-    </tr>
-    <tr>
-        <td>0.1</td>      <td>2.9</td>      <td>2.1</td>
-    </tr>
-    <tr><td colspan="3">#Second time series</td></tr>
-    <tr>
-        <td>5.8</td>      <td>12.8</td>      <td>7.2</td>
-    </tr>
-    <tr>
-        <td>6.5</td>      <td>11.2</td>      <td>3.3</td>
-    </tr>
-    <tr>
-        <td>9.2</td>      <td>12.7</td>      <td>8.4</td>
-    </tr>
-    <tr>
-        <td>10.1</td>      <td>12.0</td>      <td>9.5</td>
-    </tr>
-</table>
+
 
 
 
 <p>Data sets can be entered in the Input Data box or uploaded in a plain-text file.</p>
+
+<a name="P">
+<h2>Format of the partial input functions (optional)</h2>
+</a>
+If the function for a variable is known, it can be used instead of inferring it from the data. Functions given as partial input will overwrite any function inferred from the data. If neither state space graph nor functions are desired output options, the partial input functions will be ignored. 
+
+
+<table align ="center" width="25%">
+    <tr>
+      <td>f3 = x1 + x4</td>
+    </tr>
+    <tr>
+      <td>f1 = x2+1+x1*x4</td>
+    </tr>
+    <tr>
+      <td>f2 = {<br>
+      x1<br>
+      x3<br>
+      }</td>
+    </tr>
+</table>
+
+<p>Partial input functions can be entered in the Input Functions box or uploaded in a plain-text file.</p>
 
 <div align="right"><a href="#top"><font size="-1" color="#FF0000">Return to the
   top</font></a></div>
