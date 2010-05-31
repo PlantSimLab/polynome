@@ -31,9 +31,15 @@ class PartialInput
         functions[variable] = functions[variable] + "{\n"
         function_list_state = true
       end
-      if (function = line.match /((x\d+(\^\d+)?)|0|1)((\+|\*)((x\d+(\^\d+)?)|0|1))*(\#\d+)?/ )
+      if (function = line.match /((x\d+(\^\d+)?)|0|1)((\+|\*)((x\d+(\^\d+)?)|0|1))*(\#0?\.\d+)?/ )
         good_line = true
-        puts "Found function #{function}"
+        f = function[0]
+        if !function[-1].nil? # with probability
+          puts "found probability"
+          f = f.sub(/#/, " # ")
+          puts f
+        end
+        puts "Found function #{f}"
         puts function.to_s
         pp function
         puts variable
@@ -41,7 +47,7 @@ class PartialInput
           puts "some error..." 
           return nil
         end
-        functions[variable] = "#{functions[variable]}#{function}\n"
+        functions[variable] = "#{functions[variable]}#{f}\n"
         #functions[variable] = functions[variable] + (function.to_s  +"\n")
         puts "functions[variable]: #{functions[variable]}"
       end

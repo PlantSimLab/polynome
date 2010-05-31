@@ -122,5 +122,23 @@ x3
 }
 ", out)
   end
+
+  def test_overwrite_stochastic_file_with_prob
+    correct = "f1 = x1" 
+    myfile = "f1 = x7
+f2 = {
+x2 #.2
+x3  #0.3
+}"
+
+  f = PartialInput.parse_into_hash correct
+  out = PartialInput.overwrite_file(f, myfile)
+  assert_equal( "f1 = x1
+f2 = {
+x2 # .2
+x3 # 0.3
+}
+", out)
+  end
   
 end
