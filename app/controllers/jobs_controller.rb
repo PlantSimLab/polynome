@@ -89,12 +89,21 @@ class JobsController < ApplicationController
         return
     end
 
+
     datafile = "public/perl/" + @job.file_prefix + ".input_function.txt"
     File.open(Rails.root.join(datafile), 'w') {|file| file.write(@job.input_function) }
-
+    
     datafile = "public/perl/" + @job.file_prefix + ".input.txt"
     File.open(Rails.root.join(datafile), 'w') {|file| file.write(@job.input_data) }
-    
+
+    if File.zero? Rails.root.join(datafile)
+        logger.info "Zero input data"
+        @error_message = "Please enter your input data or upload a file. If you do not want to use time course data and are interested in the state space, you can use <a href=\"http://dvd.vbi.vt.edu/\">DVD</a>."
+        logger.info @error_message
+        self.write_done_file("2", "<font color=red>" +  @error_message + "</font><br> ") 
+        @error_message = ""
+        return
+    end
 
     # split is also checking the input format
     datafiles = self.split_data_into_files(datafile)
